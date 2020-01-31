@@ -100,7 +100,7 @@
             self.user(data.userName);
             // Cache the access token in session storage.
             sessionStorage.setItem(tokenKey, data.access_token);
-            var url = "/test";
+            var url = "/DefaultProducts/jtable";
             $(location).attr('href', url);
         }).fail(showError);
     }

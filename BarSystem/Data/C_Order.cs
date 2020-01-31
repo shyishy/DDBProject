@@ -27,6 +27,7 @@ namespace BarSystem.Data
         public string EditBy { get; set; }
         public System.DateTime CreateDate { get; set; }
         public Nullable<System.DateTime> EditDate { get; set; }
+        public long TableNumber { get; set; }
     
         public virtual AspNetUser AspNetUser { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

@@ -1,0 +1,333 @@
+﻿
+@{
+    ViewBag.Title = "jtable";
+}
+@section scripts {
+    <script type="text/javascript">
+        var tokenKey = 'accessToken';
+        var fr;
+        var raw_productList = {};
+        var productList = {};
+        var token = sessionStorage.getItem(tokenKey);
+        var headers = {};
+        if (token) {
+            headers.Authorization = 'Bearer ' + token;
+        }
+
+        $(document).ready(function () {
+            $.ajax({
+                url: '/api/Products',
+                type: 'GET',
+                contentType: "application/json",
+                headers: headers,
+                success: function (data) {
+                    var d = [];
+                    $(data).each(function (k, v) {
+                        if (v.Available) {
+                            var obj = {};
+                            var img = '<img src="' + v.Img + '" alt="Image" style="height: 100px;" />'
+                            var text = '<div>' + v.Name + '</div>';
+                            obj.Value = v.Id;
+                            obj.DisplayText = text + img;
+                            d.push(obj);
+                            raw_productList[v.Id] = {
+                                'Name': v.Name,
+                                'Price': v.Price,
+                                'Img': v.Img
+                            }
+                        }
+                    });
+
+                    productList = d;
+                }
+            });
+
+            $('#TableContainer').jtable({
+                title: 'Order',
+                paging: false,
+                messages: {
+                    addNewRecord: 'Add Order',
+                },
+                //formCreated: function (event, data) {
+                //    //if (data.formType == "edit") {
+                //    //    var orderId = data.record.Id;
+                //    //    var url = "/DefaultProducts/jtable";
+                //    //    $(location).attr('href', url);
+                //    //}
+                //    var orderId = data.record.Id;
+                //    var url = "/DefaultProducts/jtable";
+                //    $(location).attr('href', url);
+                //},
+                recordAdded: function (event, data) {
+                    if (data.record) {
+                        setTimeout(function () {
+                            $('[data-record-key=' + data.record.Id + '] img').click();
+                        }, 200);
+                    }
+                },
+                actions: {
+                    listAction: function (postData, jtParams) {
+                        return $.Deferred(function ($dfd) {
+                            $.ajax({
+                                url: '/api/Order',
+                                type: 'GET',
+                                contentType: "application/json",
+                                headers: headers,
+                                data: postData,
+                                success: function (data) {
+                                    var result = {
+                                        "Result": "OK",
+                                        "Records": data,
+                                        "TotalRecordCount": data.length
+                                    };
+                                    $dfd.resolve(result);
+                                },
+                                error: function () {
+                                    $dfd.reject();
+                                }
+                            });
+                        });
+                    },
+                    createAction: function (postData, jtParams) {
+                        return $.Deferred(function ($dfd) {
+                            var order = {
+                                TableNumber: $('#Edit-TableNumber').children("option:selected").val(),
+                            };
+                            $.ajax({
+                                type: "POST",
+                                url: "/api/Order",
+                                data: JSON.stringify(order),
+                                contentType: "application/json",
+                                headers: headers,
+                                success: function (data) {
+                                    var result = {
+                                        "Result": "OK",
+                                        "Record": data
+                                    };
+                                    $dfd.resolve(result);
+                                    $('#TableContainer').jtable('load');
+                                },
+                                error: function () {
+                                    $dfd.reject();
+                                }
+                            });
+                        });
+                    },
+                    deleteAction: function (postData, jtParams) {
+                        return $.Deferred(function ($dfd) {
+                            var Id = postData.Id;
+                            $.ajax({
+                                type: "DELETE",
+                                url: "/api/Order/" + Id,
+                                contentType: "application/json",
+                                headers: headers,
+                                success: function (data) {
+                                    var result = {
+                                        "Result": "OK",
+                                    };
+                                    $dfd.resolve(result);
+                                    $('#TableContainer').jtable('load');
+                                },
+                                error: function () {
+                                    $dfd.reject();
+                                }
+                            });
+                        });
+                    },
+                },
+                fields: {
+                    Id: {
+                        key: true,
+                        visibility: 'hidden'
+                    },
+                    UserName: {
+                        title: 'Ower',
+                        width: '10%',
+                        create: false
+                    },
+                    TableNumber: {
+                        title: 'Table',
+                        width: '10%',
+                        options: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+                    },
+                    Available: {
+                        type: "hidden"
+                    },
+                    CreateBy: {
+                        title: 'Create By',
+                        create: false,
+                        input: function (data) {
+                            var val = data.record ? data.record.CreateBy : ''
+                            var $input = $('<input disabled name="CreateBy" id="Edit-CreateBy" value="' + val + '">')
+                            return $input;
+                        }
+                    },
+                    CreateDate: {
+                        title: 'Create Date',
+                        create: false,
+                        input: function (data) {
+                            var val = data.record ? data.record.CreateDate : ''
+                            var $input = $('<input disabled name="CreateDate" id="Edit-CreateDate" value="' + val + '">')
+                            return $input;
+                        }
+                    },
+                    EditBy: {
+                        title: 'Edit By',
+                        create: false,
+                        input: function (data) {
+                            var val = data.record ? data.record.EditBy : ''
+                            var $input = $('<input disabled name="EditBy" id="Edit-EditBy" value="' + val + '">')
+                            return $input;
+                        }
+                    },
+                    EditDate: {
+                        title: 'Edit Date',
+                        create: false,
+                        input: function (data) {
+                            var val = data.record ? data.record.EditDate : ''
+                            var $input = $('<input disabled name="EditDate" id="Edit-EditDate" value="' + val + '">')
+                            return $input;
+                        }
+                    },
+                    OrderProduct: {
+                        title: '',
+                        width: '1%',
+                        sorting: false,
+                        edit: false,
+                        create: false,
+                        display: function (orderData) {
+                            //Create an image that will be used to open child table
+                            var $img = $('<img src="/Scripts/jtable/themes/metro/edit.png" title="Order product" />');
+                            //Open child table when user clicks the image
+                            $img.click(function () {
+                                $('#TableContainer').jtable('openChildTable',
+                                    $img.closest('tr'), //Parent row
+                                    {
+                                        title: 'Product List',
+                                        recordAdded: function (event, data) {
+                                            if (data.record) {
+                                                setTimeout(function () {
+                                                    $('[data-record-key=' + data.record.Id + '] img').click();
+                                                }, 200);
+                                            }
+                                        },
+                                        actions: {
+                                            listAction: function (postData, jtParams) {
+                                                return $.Deferred(function ($dfd) {
+                                                    $.ajax({
+                                                        url: '/api/OrderProducts/' + orderData.record.Id,
+                                                        type: 'GET',
+                                                        contentType: "application/json",
+                                                        headers: headers,
+                                                        data: postData,
+                                                        success: function (data) {
+                                                            var result = {
+                                                                "Result": "OK",
+                                                                "Records": data,
+                                                                "TotalRecordCount": data.length
+                                                            };
+                                                            $dfd.resolve(result);
+                                                        },
+                                                        error: function () {
+                                                            $dfd.reject();
+                                                        }
+                                                    });
+                                                });
+                                            },
+
+                                            deleteAction: function (postData, jtParams) {
+                                                return $.Deferred(function ($dfd) {
+                                                    var Id = postData.Id;
+                                                    $.ajax({
+                                                        type: "DELETE",
+                                                        url: "/api/OrderProducts/" + Id,
+                                                        contentType: "application/json",
+                                                        headers: headers,
+                                                        success: function (data) {
+                                                            var result = {
+                                                                "Result": "OK",
+                                                            };
+                                                            $dfd.resolve(result);
+                                                            //$('#TableContainer').jtable('load');
+                                                        },
+                                                        error: function () {
+                                                            $dfd.reject();
+                                                        }
+                                                    });
+                                                });
+                                            },
+                                            createAction: function (postData, jtParams) {
+                                                return $.Deferred(function ($dfd) {
+                                                    var product = {};
+                                                    $(postData.split('&')).each(function (k, v) {
+                                                        var obj = v.split('=')
+                                                        product[obj[0]] = obj[1];
+                                                    });
+                                                    product['OrderId'] = orderData.record.Id;
+                                                    product['LastPrice'] = product['Quantity'] * raw_productList[product['ProductId']]['Price'];
+                                                    $.ajax({
+                                                        type: "POST",
+                                                        data: JSON.stringify(product),
+                                                        url: "/api/OrderProducts",
+                                                        contentType: "application/json",
+                                                        headers: headers,
+                                                        success: function (data) {
+                                                            var result = {
+                                                                "Result": "OK",
+                                                                "Record": data
+                                                            };
+                                                            $dfd.resolve(result);
+                                                            //$('#TableContainer').jtable('load');
+                                                        },
+                                                        error: function () {
+                                                            $dfd.reject();
+                                                        }
+                                                    });
+                                                });
+                                            }
+                                        },
+                                        paging: false,
+                                        messages: {
+                                            addNewRecord: 'Add Product',
+                                        },
+                                        fields: {
+                                            Id: {
+                                                key: true,
+                                                visibility: 'hidden'
+                                            },
+                                            ProductId: {
+                                                title: 'Product',
+                                                width: '10%',
+                                                type: 'radiobutton',
+                                                options: productList
+
+                                            },
+                                            Quantity: {
+                                                title: 'Quantity',
+                                                width: '3%',
+                                            },
+                                            LastPrice: {
+                                                title: 'Total Price',
+                                                width: '3%',
+                                                create: false
+                                            }
+                                        }
+                                    }, function (data) { //opened handler
+                                        data.childTable.jtable('load');
+                                    });
+                            });
+                            //Return image to show on the person row
+                            return $img;
+                        }
+                    }
+
+                }
+            });
+
+            $('#TableContainer').jtable('load');
+        });
+
+    </script>
+}
+<h1></h1>
+<div id="TableContainer"></div>

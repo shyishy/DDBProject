@@ -10,13 +10,17 @@
 namespace BarSystem.Data
 {
     using System;
-    using System.Collections.Generic;
     
-    public partial class C__MigrationHistory
+    public partial class SP_Product_Result
     {
-        public string MigrationId { get; set; }
-        public string ContextKey { get; set; }
-        public byte[] Model { get; set; }
-        public string ProductVersion { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public double Price { get; set; }
+        public string Img { get; set; }
+        public bool Available { get; set; }
+        public string CreateBy { get; set; }
+        public string EditBy { get; set; }
+        public System.DateTime CreateDate { get; set; }
+        public Nullable<System.DateTime> EditDate { get; set; }
     }
 }

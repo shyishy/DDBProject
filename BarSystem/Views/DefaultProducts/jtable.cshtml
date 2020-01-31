@@ -1,0 +1,208 @@
+﻿
+@{
+    ViewBag.Title = "jtable";
+}
+@section scripts {
+    <script type="text/javascript">
+        var tokenKey = 'accessToken';
+        var fr;
+        var token = sessionStorage.getItem(tokenKey);
+        var headers = {};
+        if (token) {
+            headers.Authorization = 'Bearer ' + token;
+        }
+        $(document).ready(function () {
+            $('#TableContainer').jtable({
+                title: 'Product',
+                paging: false, //Enable paging
+                actions: {
+                    listAction: function (postData, jtParams) {
+                        return $.Deferred(function ($dfd) {
+                            $.ajax({
+                                url: '/api/Products',
+                                type: 'GET',
+                                contentType: "application/json",
+                                headers: headers,
+                                data: postData,
+                                success: function (data) {
+                                    var result = {
+                                        "Result": "OK",
+                                        "Records": data,
+                                        "TotalRecordCount": data.length
+                                    };
+                                    $dfd.resolve(result);
+                                },
+                                error: function () {
+                                    $dfd.reject();
+                                }
+                            });
+                        });
+                    },
+                    deleteAction: function (postData, jtParams) {
+                        return $.Deferred(function ($dfd) {
+                            var Id = postData.Id;
+                            console.log(postData);
+                            $.ajax({
+                                type: "DELETE",
+                                url: "/api/Products/" + Id,
+                                contentType: "application/json",
+                                headers: headers,
+                                success: function (data) {
+                                    var result = {
+                                        "Result": "OK",
+                                    };
+                                    $dfd.resolve(result);
+                                    $('#TableContainer').jtable('load');
+                                },
+                                error: function () {
+                                    $dfd.reject();
+                                }
+                            });
+                        });
+                    },
+                    updateAction: function (postData, jtParams) {
+                        return $.Deferred(function ($dfd) {
+                            var Id = $('#Edit-Id').val();
+                            var product = {
+                                Id: Id,
+                                Name: $('#Edit-Name').val(),
+                                Price: $('#Edit-Price').val(),
+                                Img: fr.result == null ? $('#Edit-Img')[0].defaultValue : fr.result,
+                                Available: $('#Edit-Available').children("option:selected").val() == '0' ? false : true,
+                                CreateBy: $('#Edit-CreateBy').val(),
+                                CreateDate: $('#Edit-CreateDate').val()
+                            };
+
+                            $.ajax({
+                                type: "PUT",
+                                data: JSON.stringify(product),
+                                url: "/api/Products/" + Id,
+                                contentType: "application/json",
+                                headers: headers,
+                                success: function (data) {
+                                    var result = {
+                                        "Result": "OK",
+                                        "Record": data
+                                    };
+                                    $dfd.resolve(result);
+                                    $('#TableContainer').jtable('load');
+                                },
+                                error: function () {
+                                    $dfd.reject();
+                                }
+                            });
+                        });
+                    },
+                    createAction: function (postData, jtParams) {
+                        return $.Deferred(function ($dfd) {
+                            var product = {
+                                Name: $('#Edit-Name').val(),
+                                Price: $('#Edit-Price').val(),
+                                Img: fr.result,
+                                Available: $('#Edit-Available').children("option:selected").val() == '0' ? false : true
+                            };
+
+                            $.ajax({
+                                type: "POST",
+                                data: JSON.stringify(product),
+                                url: "/api/Products",
+                                contentType: "application/json",
+                                headers: headers,
+                                success: function (data) {
+                                    var result = {
+                                        "Result": "OK",
+                                        "Record": data
+                                    };
+                                    $dfd.resolve(result);
+                                    $('#TableContainer').jtable('load');
+                                },
+                                error: function () {
+                                    $dfd.reject();
+                                }
+                            });
+                        });
+                    }
+                },
+                fields: {
+                    Id: {
+                        key: true,
+                        visibility: 'hidden'
+                    },
+                    Name: {
+                        title: 'Name',
+                        width: '10%'
+                    },
+                    Price: {
+                        title: 'Price',
+                        width: '10%'
+                    },
+                    Img: {
+                        title: 'Img',
+                        width: '10%',
+                        display: function (data) {
+                            var img = '<img src="' + data.record.Img + '" alt="Image" style="height: 100px;" />'
+                            return img;
+                        },
+                        input: function (data) {
+                            fr = fr = new FileReader();
+                            var val = data.record ? data.record.Img : ''
+                            var $fileupload = $('<input id="Edit-Img" name="Img" type="file" value="' + val + '">');
+                            $fileupload.on('change', function () {
+                                fr.readAsDataURL($('#Edit-Img')[0].files[0]);
+                            });
+                            return $fileupload;
+                        }
+                    },
+                    Available: {
+                        title: 'Available',
+                        width: '6%',
+                        options: { '0': 'Unavailable', '1': 'Available' }
+
+                    },
+                    CreateBy: {
+                        title: 'Create By',
+                        create: false,
+                        input: function (data) {
+                            var val = data.record ? data.record.CreateBy : ''
+                            var $input = $('<input disabled name="CreateBy" id="Edit-CreateBy" value="' + val + '">')
+                            return $input;
+                        }
+                    },
+                    CreateDate: {
+                        title: 'Create Date',
+                        create: false,
+                        input: function (data) {
+                            var val = data.record ? data.record.CreateDate : ''
+                            var $input = $('<input disabled name="CreateDate" id="Edit-CreateDate" value="' + val + '">')
+                            return $input;
+                        }
+                    },
+                    EditBy: {
+                        title: 'Edit By',
+                        create: false,
+                        input: function (data) {
+                            var val = data.record ? data.record.EditBy : ''
+                            var $input = $('<input disabled name="EditBy" id="Edit-EditBy" value="' + val + '">')
+                            return $input;
+                        }
+                    },
+                    EditDate: {
+                        title: 'Edit Date',
+                        create: false,
+                        input: function (data) {
+                            var val = data.record ? data.record.EditDate : ''
+                            var $input = $('<input disabled name="EditDate" id="Edit-EditDate" value="' + val + '">')
+                            return $input;
+                        }
+                    }
+
+                }
+            });
+
+            $('#TableContainer').jtable('load');
+        });
+
+    </script>
+}
+<h1></h1>
+<div id="TableContainer"></div>

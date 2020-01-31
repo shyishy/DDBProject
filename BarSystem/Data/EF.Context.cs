@@ -12,6 +12,8 @@ namespace BarSystem.Data
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
+    using System.Data.Entity.Core.Objects;
+    using System.Linq;
     
     public partial class Entities : DbContext
     {
@@ -25,7 +27,6 @@ namespace BarSystem.Data
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<C__MigrationHistory> C__MigrationHistory { get; set; }
         public virtual DbSet<C_Order> C_Order { get; set; }
         public virtual DbSet<AspNetRole> AspNetRoles { get; set; }
         public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; }
@@ -33,5 +34,33 @@ namespace BarSystem.Data
         public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
         public virtual DbSet<OrderProduct> OrderProducts { get; set; }
         public virtual DbSet<Product> Products { get; set; }
+    
+        public virtual ObjectResult<SP_Order_Result> SP_Order()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<SP_Order_Result>("SP_Order");
+        }
+    
+        public virtual ObjectResult<SP_Order_Result> SP_Order_By_OwerId(string owerId)
+        {
+            var owerIdParameter = owerId != null ?
+                new ObjectParameter("OwerId", owerId) :
+                new ObjectParameter("OwerId", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<SP_Order_Result>("SP_Order_By_OwerId", owerIdParameter);
+        }
+    
+        public virtual ObjectResult<SP_OrderProducts_Result> SP_OrderProducts_By_OrderId(Nullable<int> orderId)
+        {
+            var orderIdParameter = orderId.HasValue ?
+                new ObjectParameter("OrderId", orderId) :
+                new ObjectParameter("OrderId", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<SP_OrderProducts_Result>("SP_OrderProducts_By_OrderId", orderIdParameter);
+        }
+    
+        public virtual ObjectResult<SP_Product_Result> SP_Product()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<SP_Product_Result>("SP_Product");
+        }
     }
 }
