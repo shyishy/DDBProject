@@ -31,8 +31,8 @@ namespace BarSystem
                       "~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css"));
 
             //bundles.Add(new StyleBundle("~/Content/css").Include(
-           //         "~/Content/bootstrap2.css",
-            //       "~/Content/site.css"));
+            //          "~/Content/bootstrap.css",
+            //          "~/Content/site.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/knockout").Include(
                       "~/Scripts/knockout-{version}.js"));
