@@ -2,6 +2,7 @@
     background-image: url('/Content/background.png');
     padding-top: 50px;
     padding-bottom: 20px;
+    color: grey;
 }
 
 /* Set padding to keep content from hitting the edges */
@@ -15,4 +16,5 @@ input,
 select,
 textarea {
     max-width: 280px;
+    color: yellow;
 }
