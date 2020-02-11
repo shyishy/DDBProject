@@ -3,6 +3,7 @@
     padding-top: 50px;
     padding-bottom: 20px;
     color: grey;
+    <table> <tr bgcolor="#FF0000"></tr>
 }
 
 /* Set padding to keep content from hitting the edges */
@@ -18,3 +19,5 @@ textarea {
     max-width: 280px;
     
 }
+
+
