@@ -566,6 +566,7 @@
     <Content Include="Views\DefaultOrder\Details.cshtml" />
     <Content Include="Views\DefaultOrder\Edit.cshtml" />
     <Content Include="Views\DefaultOrder\Index.cshtml" />
+    <Content Include="Views\Home\Contact.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

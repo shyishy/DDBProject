@@ -1,0 +1,11 @@
+## Register user page 
+https://localhost:44322/Home/Register
+
+## Login page
+https://localhost:44322/
+
+##Product page
+https://localhost:44322/DefaultProducts/jtable
+
+##Order page
+https://localhost:44322/DefaultOrder/jtable

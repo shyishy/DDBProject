@@ -22,5 +22,12 @@ namespace BarSystem.Controllers
 
             return View();
         }
+
+        public ActionResult Contact()
+        {
+            ViewBag.Title = "Contact";
+
+            return View();
+        }
     }
 }
